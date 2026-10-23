@@ -5,9 +5,10 @@ const clamp=(n,min=0,max=100)=>Math.max(min,Math.min(max,n));
 const now=()=>Date.now();
 const stages=['Newborn','Tiny Baby','Little Puff','Wobbly Baby','Curious Baby','Little Explorer','Fluffy Junior','Sweet Junior','Almost Grown','Mimo'];
 const KEY='mimo-beta-3d-v1';
-const defaults=()=>({born:now(),last:now(),hunger:82,happy:88,energy:76,clean:93,wet:0,stage:3,x:0,z:.2,yaw:.32,sleeping:false,diary:[{emoji:'🐾',text:'Mimo chegou à sua casinha!',at:now()}]});
+const defaults=()=>({born:now(),last:now(),hunger:82,happy:88,energy:76,clean:93,wet:0,stage:1,x:0,z:.2,yaw:.32,sleeping:false,diary:[{emoji:'🐾',text:'Mimo chegou à sua casinha!',at:now()}]});
 let state;
 try{const loaded=JSON.parse(localStorage.getItem(KEY)||'null');state=loaded&&typeof loaded==='object'?{...defaults(),...loaded,diary:Array.isArray(loaded.diary)?loaded.diary:[]}:defaults();}catch{state=defaults()}
+if(!localStorage.getItem('mimo-growth-birth-v2')){if(state.stage===3)state.stage=1;localStorage.setItem('mimo-growth-birth-v2','1');}
 state.hunger=clamp(state.hunger);state.happy=clamp(state.happy);state.energy=clamp(state.energy);state.clean=clamp(state.clean);state.wet=clamp(state.wet);state.stage=clamp(Math.round(state.stage),1,10);state.x=clamp(state.x,-3.5,3.5);state.z=clamp(state.z,-2.9,2.9);
 // A necessidade aumenta com o tempo real; ninguém morre, ninguém perde o MIMO.
 const hours=clamp((now()-state.last)/3600000,0,48);
