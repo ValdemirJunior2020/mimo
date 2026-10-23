@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#fff6f0">
+  <meta name="description" content="MIMO — Your Little Friend. Beta 3D local, gratuita e offline.">
+  <title>MIMO — Your Little Friend | Beta 3D</title>
+  <link rel="icon" href="assets/paw.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand"><div class="paw-mark">🐾</div><div><span class="brand-name">mimo<span class="brand-dot">.</span></span><small>your little friend <span class="beta-label">BETA 3D</span></small></div></div>
+      <div class="top-right"><span class="day-tag"><span class="sun">☀</span> <span id="dayLabel">Dia 1</span></span><button class="icon-button" id="soundButton" title="Ativar ou desativar som" aria-label="Alternar som">🔊</button><button class="icon-button" id="helpButton" title="Como jogar" aria-label="Como jogar">?</button></div>
+    </header>
+    <main class="layout">
+      <aside class="left-panel card">
+        <div class="pet-id"><img src="assets/mimo-referencia-final.jpg" alt="Referência original de MIMO"/><div><div class="eyebrow">SEU PEQUENO AMIGO</div><h1>Mimo <span>♥</span></h1><div id="petMood" class="mood"><span class="mood-dot"></span> Muito feliz!</div></div></div>
+        <p class="panel-caption">Como está o Mimo?</p>
+        <div class="meter-list">
+          <div class="meter"><div class="meter-title"><span>🍓 Fome</span><strong id="hungerValue">82%</strong></div><div class="track"><div id="hungerBar" class="fill pink"></div></div></div>
+          <div class="meter"><div class="meter-title"><span>💜 Felicidade</span><strong id="happyValue">88%</strong></div><div class="track"><div id="happyBar" class="fill lilac"></div></div></div>
+          <div class="meter"><div class="meter-title"><span>💤 Energia</span><strong id="energyValue">76%</strong></div><div class="track"><div id="energyBar" class="fill blue"></div></div></div>
+          <div class="meter"><div class="meter-title"><span>🫧 Limpeza</span><strong id="cleanValue">93%</strong></div><div class="track"><div id="cleanBar" class="fill mint"></div></div></div>
+          <div class="meter"><div class="meter-title"><span>💦 Seco</span><strong id="dryValue">100%</strong></div><div class="track"><div id="dryBar" class="fill aqua"></div></div></div>
+        </div>
+        <div class="care-tip" id="careTip"><span>💡</span><span>Toque no chão para ele explorar. Ele tem quatro patinhas e adora carinho!</span></div>
+        <div class="side-separator"></div>
+        <div class="small-heading">FASES DE CRESCIMENTO <span class="prototype-chip">PRÉVIA</span></div>
+        <div class="stage-display"><strong id="stageTitle">Little Puff</strong><span id="stageCount">03 / 10</span></div>
+        <input type="range" id="stageSlider" min="1" max="10" value="3" aria-label="Visualizar fase de crescimento">
+        <p class="muted-tiny">Prévia técnica: tamanho e proporções. O modelo final de cada fase será feito em Blender.</p>
+        <div class="side-separator"></div>
+        <button class="reference-link" id="referenceButton"><img src="assets/mimo-referencia-final.jpg" alt=""/><span>Ver personagem de referência<small>Foto original enviada por você</small></span><span>↗</span></button>
+      </aside>
+      <section class="game-column">
+        <div class="game-scene">
+          <canvas id="gameCanvas" tabindex="0" aria-label="MIMO em ambiente 3D interativo"></canvas>
+          <div class="scene-veil" id="sceneVeil"><div class="loader-paw">🐾</div><strong>Preparando a casinha do Mimo...</strong><small>Construindo o mundo 3D local</small></div>
+          <div class="scene-top"><div class="scene-pill">🏡 Casinha do Mimo</div><div id="modeChip" class="mode-pill">● EXPLORANDO</div></div>
+          <div class="thought" id="thoughtBubble" role="status" aria-live="polite">Oi! Quer brincar comigo? 🥹</div>
+          <div class="scene-footer"><span>👆 Toque no chão para passear</span><span class="desktop-hint">⌨ WASD / setas para andar</span></div>
+          <div class="scene-error" id="sceneError" hidden><strong>WebGL indisponível</strong><p>Abra no Chrome/Edge atualizado e confira a aceleração de hardware.</p></div>
+        </div>
+        <div class="actions-shell card"><div class="actions-header"><div><div class="eyebrow">CUIDE DO SEU AMIGUINHO</div><h2>O que vamos fazer?</h2></div><span class="save-notice">✓ Salvamento automático</span></div>
+          <div class="actions-grid">
+            <button class="action-button" data-action="feed"><span class="action-emoji">🍓</span><strong>Comida</strong><small>Dar papinha</small></button>
+            <button class="action-button" data-action="play"><span class="action-emoji">🧸</span><strong>Brincar</strong><small>Correr e buscar</small></button>
+            <button class="action-button" data-action="pet"><span class="action-emoji">💗</span><strong>Carinho</strong><small>Fazer cafuné</small></button>
+            <button class="action-button" data-action="bath"><span class="action-emoji">🛁</span><strong>Banho</strong><small>Espuma e água</small></button>
+            <button class="action-button" data-action="dry"><span class="action-emoji">🧺</span><strong>Secar</strong><small>Toalha quentinha</small></button>
+            <button class="action-button" data-action="sleep"><span class="action-emoji">🌙</span><strong>Dormir</strong><small>Tirar soneca</small></button>
+            <button class="action-button" data-action="call"><span class="action-emoji">📣</span><strong>Chamar</strong><small>"Mimo, vem!"</small></button>
+            <button class="action-button" data-action="guard"><span class="action-emoji">🚪</span><strong>Proteger</strong><small>Alguém na porta!</small></button>
+          </div>
+        </div>
+      </section>
+      <aside class="right-panel">
+        <div class="card personality"><div class="eyebrow">UM FILHOTE COM PERSONALIDADE</div><h2>Pequenas emoções, <em>grandes sentimentos.</em></h2><div class="personality-figure"><span id="stateEmoji">🐶</span><div><strong id="stateTitle">Explorando</strong><small id="stateDescription">Farejando os cantinhos da casinha.</small></div></div><p>O Mimo sente fome, fica molhado, pede atenção e protege o que é dele. Conforme cresce, aprende a latir e rosnar.</p></div>
+        <div class="card diary"><div class="diary-title"><div class="eyebrow">DIÁRIO DO MIMO</div><span class="live-dot"></span></div><ul id="diaryList" class="diary-list" aria-live="polite"></ul></div>
+        <div class="dev-note"><span>✨</span><div><strong>Construído para testar!</strong><p>Motor 3D próprio para este protótipo, sem CDN, sem APIs, sem login. A próxima etapa é substituir o modelo temporário por um filhotinho rigado no Blender.</p></div></div>
+      </aside>
+    </main>
+    <footer class="footer"><span>Feito com carinho para o Mimo ♥</span><span>100% gratuito · Sem nuvem · Modo offline</span></footer>
+  </div>
+  <dialog id="infoDialog"><form method="dialog"><button class="dialog-close" aria-label="Fechar">✕</button><div class="dialog-icon">🐾</div><h2>Bem-vindo à casinha!</h2><p>Este beta já tem um filhotinho 3D animado, necessidades que evoluem ao longo do tempo, sons gerados localmente, salvamento automático e comandos por toque.</p><ul><li><strong>Toque no chão:</strong> Mimo caminha de verdade com quatro patinhas.</li><li><strong>Duplo toque:</strong> ele corre para o ponto marcado.</li><li><strong>Teclas WASD/setas:</strong> controle os movimentos no computador.</li><li><strong>Botões:</strong> alimentar, cuidar, secar, brincar e proteger.</li><li><strong>Controle de fases:</strong> apenas prévia técnica, não são dez modelos finalizados.</li></ul><p>O microfone, a IA Ollama, a rigagem e o pelo definitivo ainda não estão implementados. O botão <b>Chamar</b> simula chamar Mimo, sem acessar o microfone.</p><button class="dialog-primary" value="close">Vamos brincar! ♥</button></form></dialog>
+  <dialog id="referenceDialog" class="reference-dialog"><form method="dialog"><button class="dialog-close" aria-label="Fechar">✕</button><div class="eyebrow">ALVO VISUAL · REFERÊNCIA ORIGINAL</div><h2>O Mimo que vamos construir</h2><img src="assets/mimo-referencia-final.jpg" alt="Referência da aparência final do Mimo, pelagem creme e olhos enormes"/><p>O modelo 3D atual é uma <strong>maquete procedural animada</strong>, ainda não uma reprodução fiel desta foto. O personagem definitivo será modelado, peludo e rigado no Blender.</p></form></dialog>
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>

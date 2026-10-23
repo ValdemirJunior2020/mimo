@@ -1,0 +1,10 @@
+// Servidor HTTP gratuito, 100% local, sem dependências de npm.
+import http from 'node:http';
+import fs from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
+import {fileURLToPath} from 'node:url';
+const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const PORT=Number(process.env.PORT||8765);
+const MIME={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.webmanifest':'application/manifest+json','.svg':'image/svg+xml','.jpg':'image/jpeg','.jpeg':'image/jpeg','.png':'image/png','.ico':'image/x-icon'};
+http.createServer((req,res)=>{const u=new URL(req.url||'/',`http://${req.headers.host||'localhost'}`);let pathname;try{pathname=decodeURIComponent(u.pathname)}catch{res.writeHead(400);res.end('Bad request');return}const file=path.resolve(ROOT,'.'+pathname,(pathname.endsWith('/')?'index.html':''));if(file!==ROOT&&!file.startsWith(ROOT+path.sep)){res.writeHead(403);res.end('Forbidden');return}fs.stat(file,(err,info)=>{if(err||!info.isFile()){res.writeHead(404,{'Content-Type':'text/plain; charset=utf-8'});res.end('Arquivo não encontrado');return}res.writeHead(200,{'Content-Type':MIME[path.extname(file).toLowerCase()]||'application/octet-stream','Cache-Control':'no-cache','X-Content-Type-Options':'nosniff'});fs.createReadStream(file).pipe(res)})}).listen(PORT,'0.0.0.0',()=>{console.log('\n============================================');console.log('     MIMO — BETA 3D LOCAL 🐾');console.log('============================================');console.log(` No seu computador: http://localhost:${PORT}`);for(const iface of Object.values(os.networkInterfaces()))for(const addr of iface||[])if(addr.family==='IPv4'&&!addr.internal)console.log(` iPhone na mesma rede: http://${addr.address}:${PORT}`);console.log('\n Sem API paga. Sem nuvem. Ctrl+C para parar.\n')});
