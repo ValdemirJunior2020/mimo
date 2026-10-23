@@ -5,7 +5,7 @@ const clamp=(n,min=0,max=100)=>Math.max(min,Math.min(max,n));
 const now=()=>Date.now();
 const stages=['Newborn','Tiny Baby','Little Puff','Wobbly Baby','Curious Baby','Little Explorer','Fluffy Junior','Sweet Junior','Almost Grown','Mimo'];
 const KEY='mimo-beta-3d-v1';
-const defaults=()=>({born:now(),last:now(),hunger:82,happy:88,energy:76,clean:93,wet:0,stage:1,x:0,z:.2,yaw:.32,sleeping:false,diary:[{emoji:'🐾',text:'Mimo chegou à sua casinha!',at:now()}]});
+const defaults=()=>({born:now(),last:now(),hunger:82,happy:88,energy:76,clean:93,wet:0,stage:1,bond:0,lastVisitDay:0,careDay:0,careKinds:[],petName:'',x:0,z:.2,yaw:.32,sleeping:false,diary:[{emoji:'🐾',text:'Mimo chegou à sua casinha!',at:now()}]});
 let state;
 try{const loaded=JSON.parse(localStorage.getItem(KEY)||'null');state=loaded&&typeof loaded==='object'?{...defaults(),...loaded,diary:Array.isArray(loaded.diary)?loaded.diary:[]}:defaults();}catch{state=defaults()}
 // A prévia antiga começava na fase 3 e gravava essa escolha no navegador.
@@ -15,28 +15,63 @@ if(!localStorage.getItem(newbornMigrationKey)){
   if(state.stage===3)state.stage=1;
   try{localStorage.setItem(newbornMigrationKey,'1')}catch{}
 }
+state.petName=typeof state.petName==='string'?state.petName.trim().slice(0,24):'';
+state.bond=clamp(Number(state.bond)||0);
+state.careDay=Number(state.careDay)||0;
+state.careKinds=Array.isArray(state.careKinds)?state.careKinds:[];
+state.lastVisitDay=Number(state.lastVisitDay)||0;
+const daysSinceBirth=()=>Math.max(1,1+Math.floor((now()-state.born)/86400000));
+const pet=()=>state.petName||'Mimo';
 state.hunger=clamp(state.hunger);state.happy=clamp(state.happy);state.energy=clamp(state.energy);state.clean=clamp(state.clean);state.wet=clamp(state.wet);state.stage=clamp(Math.round(state.stage),1,10);state.x=clamp(state.x,-3.5,3.5);state.z=clamp(state.z,-2.9,2.9);
 // A necessidade aumenta com o tempo real; ninguém morre, ninguém perde o MIMO.
 const hours=clamp((now()-state.last)/3600000,0,48);
 state.hunger=clamp(state.hunger-hours*1.6);state.happy=clamp(state.happy-hours*.9);state.energy=clamp(state.energy-hours*.5);state.clean=clamp(state.clean-hours*.4);state.wet=clamp(state.wet-hours*4);state.last=now();
 let scene=null;const audio=new PuppyAudio();let target=null,motion='idle',activityUntil=0,arrive=null,walkSpeed=1.35,elapsed=0,lastTime=0,lastUi=-1,saveAccumulator=0,autonomousTimer=7,complaintTimer=6,frameCount=0;
 const feelings={idle:['🐶','Explorando','Farejando os cantinhos da casinha.'],walk:['🐾','Passeando','Quatro patinhas em movimento!'],run:['💨','Correndo','Olha como ele corre!'],feed:['🍓','Comendo','Nhac, nhac, que gostoso!'],play:['🧸','Brincando','Seu brinquedo favorito!'],pet:['💗','Carinho','Ele fecha os olhinhos de felicidade.'],bath:['🫧','Banho','Agora ele está limpinho, mas molhado.'],shake:['💦','Sacudindo','Mimo não gosta de ficar molhado!'],guard:['🛡️','Protegendo','Essa casinha e esses brinquedos são dele.'],sleep:['💤','Dormindo','Sonhando com biscoitinhos.'],call:['📣','Respondendo','Mimo vem quando o dono chama!'],sniff:['👃','Farejando','O que será esse cheiro?'],whine:['🥺','Reclamando','Mimo precisa de cuidados!']};
+// Personalização local: o nome pertence ao jogador e não é enviado a serviços.
+const nameDialog=$('#nameDialog'), nameInput=$('#petNameInput');
+function paintIdentity(){
+  for(const el of document.querySelectorAll('[data-pet-name]'))el.textContent=pet();
+  document.title=pet()+' — Your Little Friend';
+  const bond=$('#bondValue');if(bond)bond.textContent=Math.round(state.bond)+'%';
+  const bondBar=$('#bondBar');if(bondBar)bondBar.style.width=state.bond+'%';
+}
+function gainBond(kind,points){
+  const day=daysSinceBirth();
+  if(state.careDay!==day){state.careDay=day;state.careKinds=[]}
+  if(!state.careKinds.includes(kind)){
+    state.careKinds.push(kind);
+    state.bond=clamp(state.bond+points);
+    if(state.careKinds.length===3){state.bond=clamp(state.bond+5);say('Você cuidou de mim de três jeitos hoje! Obrigado! 💗',5);audio.play('happy');log('🎀',pet()+' ganhou uma lembrança de carinho hoje.');}
+  }
+}
+nameDialog.addEventListener('submit',e=>{
+  e.preventDefault();const chosen=nameInput.value.trim().replace(/\\s+/g,' ').slice(0,24);
+  if(!chosen){nameInput.focus();return}
+  const first=!state.petName;
+  state.petName=chosen;state.lastVisitDay=daysSinceBirth();nameDialog.close();paintIdentity();
+  audio.wake();audio.play('happy');
+  say(first?'Meu nome é '+chosen+'! Vamos ser amigos? 🐾':'Agora meu nome é '+chosen+'! 🐾',5);
+  if(first)log('💗','Você escolheu o nome '+chosen+'.');
+  save();
+});
+$('#renameButton').addEventListener('click',()=>{nameInput.value=state.petName;nameDialog.showModal();nameInput.focus()});
 const bubble=$('#thoughtBubble');let bubbleHideAt=0;
 function say(text,duration=4.4){bubble.textContent=text;bubble.classList.remove('hidden');bubbleHideAt=performance.now()/1000+duration;}
 function log(emoji,text){state.diary.unshift({emoji,text,at:now()});state.diary=state.diary.slice(0,8);paintDiary();save();}
 function paintDiary(){const list=$('#diaryList');list.replaceChildren();for(const entry of state.diary.slice(0,5)){const li=document.createElement('li'),emo=document.createElement('span'),content=document.createElement('span'),caption=document.createElement('small');emo.className='log-emoji';emo.textContent=entry.emoji;content.textContent=entry.text;caption.textContent=new Intl.DateTimeFormat('pt-BR',{hour:'2-digit',minute:'2-digit'}).format(new Date(entry.at));content.append(caption);li.append(emo,content);list.append(li)}}
 function save(){try{state.last=now();localStorage.setItem(KEY,JSON.stringify(state))}catch(e){console.warn('Não foi possível salvar o progresso:',e)}}
 function setMood(stateName){const [emoji,title,detail]=feelings[stateName]||feelings.idle;$('#stateEmoji').textContent=emoji;$('#stateTitle').textContent=title;$('#stateDescription').textContent=detail;$('#modeChip').textContent={guard:'● PROTEGENDO',sleep:'● SONHANDO',run:'● CORRENDO',walk:'● PASSEANDO',whine:'● PRECISA DE VOCÊ'}[stateName]||'● EXPLORANDO';}
-function paint(){for(const [key,id] of [['hunger','hunger'],['happy','happy'],['energy','energy'],['clean','clean']]){const v=clamp(state[key]);$('#'+id+'Value').textContent=Math.round(v)+'%';$('#'+id+'Bar').style.width=v+'%'}let dry=clamp(100-state.wet);$('#dryValue').textContent=Math.round(dry)+'%';$('#dryBar').style.width=dry+'%';$('#stageSlider').value=state.stage;$('#stageTitle').textContent=stages[state.stage-1];$('#stageCount').textContent=String(state.stage).padStart(2,'0')+' / 10';const day=Math.max(1,1+Math.floor((now()-state.born)/86400000));$('#dayLabel').textContent='Dia '+day;const care=$('#careTip');let advice='Mimo está feliz! Toque no chão para ele passear.';let mood='Muito feliz!';if(state.wet>35){advice='Mimo está molhado e reclamando! Use a toalha para secar.';mood='Todo molhadinho!'}else if(state.hunger<35){advice='A barriguinha está roncando. Hora da papinha!';mood='Com fome!'}else if(state.energy<26){advice='Ele está com soninho. Hora de descansar.';mood='Sonolento'}else if(state.happy<30){advice='Mimo quer atenção. Vamos brincar ou dar carinho.';mood='Quer carinho'}else if(state.clean<33){advice='Mimo precisa de um banho!';mood='Precisa de banho'}else if(state.sleeping)mood='Dormindo...';care.lastElementChild.textContent=advice;$('#petMood').lastChild.textContent=' '+mood;setMood(motion)}
+function paint(){paintIdentity();for(const [key,id] of [['hunger','hunger'],['happy','happy'],['energy','energy'],['clean','clean']]){const v=clamp(state[key]);$('#'+id+'Value').textContent=Math.round(v)+'%';$('#'+id+'Bar').style.width=v+'%'}let dry=clamp(100-state.wet);$('#dryValue').textContent=Math.round(dry)+'%';$('#dryBar').style.width=dry+'%';$('#stageSlider').value=state.stage;$('#stageTitle').textContent=stages[state.stage-1];$('#stageCount').textContent=String(state.stage).padStart(2,'0')+' / 10';const day=Math.max(1,1+Math.floor((now()-state.born)/86400000));$('#dayLabel').textContent='Dia '+day;const care=$('#careTip');let advice='Mimo está feliz! Toque no chão para ele passear.';let mood='Muito feliz!';if(state.wet>35){advice='Mimo está molhado e reclamando! Use a toalha para secar.';mood='Todo molhadinho!'}else if(state.hunger<35){advice='A barriguinha está roncando. Hora da papinha!';mood='Com fome!'}else if(state.energy<26){advice='Ele está com soninho. Hora de descansar.';mood='Sonolento'}else if(state.happy<30){advice='Mimo quer atenção. Vamos brincar ou dar carinho.';mood='Quer carinho'}else if(state.clean<33){advice='Mimo precisa de um banho!';mood='Precisa de banho'}else if(state.sleeping)mood='Dormindo...';care.lastElementChild.textContent=advice;$('#petMood').lastChild.textContent=' '+mood;setMood(motion)}
 function activity(name,seconds=2.8){motion=name;activityUntil=elapsed+seconds;target=null;arrive=null;}
 function goTo(x,z,run=false,arriveFn=null){state.sleeping=false;target={x:clamp(x,-3.4,3.4),z:clamp(z,-2.8,2.8)};walkSpeed=run?2.55:1.25;arrive=arriveFn;motion=run?'run':'walk';}
 function action(name){audio.wake();if(name!=='sleep')state.sleeping=false;switch(name){
-  case 'feed':state.hunger=clamp(state.hunger+27);state.happy=clamp(state.happy+5);state.clean=clamp(state.clean-2);goTo(1.65,1.55,false,()=>{activity('feed',3.1);audio.play('eat');say('Nhac nhac! Eu amo minha papinha! 🍓');});say('Oba! Comidinha! Já vou! 🍓');log('🍓','Mimo ganhou uma papinha deliciosa.');break;
-  case 'play':state.happy=clamp(state.happy+20);state.energy=clamp(state.energy-7);state.hunger=clamp(state.hunger-5);goTo(-1.95,1.08,true,()=>{activity('play',4.8);audio.play('squeak');say('A bolinha é MINHA! Au au! 🧸');});say('Corre, Mimo! Pega a bolinha! 🧸');log('🧸','Mimo correu para brincar com a bolinha.');break;
-  case 'pet':state.happy=clamp(state.happy+14);activity('pet',3.5);audio.play('happy');say('Hmmm... mais carinho, por favor! 💗');log('💗','Mimo recebeu muito carinho.');break;
-  case 'bath':state.clean=100;state.wet=85;activity('bath',2.0);audio.play('water');say('Aiii! Fiquei molhadinho! Me seca! 🥺');log('🛁','Mimo tomou banho e ficou molhado.');break;
-  case 'dry':state.wet=0;state.happy=clamp(state.happy+6);activity('shake',2.5);audio.play('happy');say('Ufa! Toalhinha gostosa! Agora estou sequinho. 🥰');log('🧺','Mimo foi seco com a toalha.');break;
-  case 'sleep':state.sleeping=!state.sleeping;motion=state.sleeping?'sleep':'idle';activityUntil=state.sleeping?Infinity:elapsed;target=null;arrive=null;if(state.sleeping){say('Zzz... boa noite! 🌙',5);audio.play('snore');log('💤','Mimo deitou para tirar uma soneca.')}else{say('Já acordei! Vamos brincar? 🐶');audio.play('happy');log('☀️','Mimo acordou da soneca.')}break;
+  case 'feed':gainBond('feed',5);state.hunger=clamp(state.hunger+27);state.happy=clamp(state.happy+5);state.clean=clamp(state.clean-2);goTo(1.65,1.55,false,()=>{activity('feed',3.1);audio.play('eat');say('Nhac nhac! Eu amo minha papinha! 🍓');});say('Oba! Comidinha! Já vou! 🍓');log('🍓','Mimo ganhou uma papinha deliciosa.');break;
+  case 'play':gainBond('play',6);state.happy=clamp(state.happy+20);state.energy=clamp(state.energy-7);state.hunger=clamp(state.hunger-5);goTo(-1.95,1.08,true,()=>{activity('play',4.8);audio.play('squeak');say('A bolinha é MINHA! Au au! 🧸');});say('Corre, Mimo! Pega a bolinha! 🧸');log('🧸','Mimo correu para brincar com a bolinha.');break;
+  case 'pet':gainBond('pet',4);state.happy=clamp(state.happy+14);activity('pet',3.5);audio.play('happy');say('Hmmm... mais carinho, por favor! 💗');log('💗','Mimo recebeu muito carinho.');break;
+  case 'bath':gainBond('bath',4);state.clean=100;state.wet=85;activity('bath',2.0);audio.play('water');say('Aiii! Fiquei molhadinho! Me seca! 🥺');log('🛁','Mimo tomou banho e ficou molhado.');break;
+  case 'dry':gainBond('dry',3);state.wet=0;state.happy=clamp(state.happy+6);activity('shake',2.5);audio.play('happy');say('Ufa! Toalhinha gostosa! Agora estou sequinho. 🥰');log('🧺','Mimo foi seco com a toalha.');break;
+  case 'sleep':gainBond('sleep',3);state.sleeping=!state.sleeping;motion=state.sleeping?'sleep':'idle';activityUntil=state.sleeping?Infinity:elapsed;target=null;arrive=null;if(state.sleeping){say('Zzz... boa noite! 🌙',5);audio.play('snore');log('💤','Mimo deitou para tirar uma soneca.')}else{say('Já acordei! Vamos brincar? 🐶');audio.play('happy');log('☀️','Mimo acordou da soneca.')}break;
   case 'call':goTo(.2,1.95,true,()=>{activity('call',3);audio.play('bark');say('AU! AU! Você me chamou? Cheguei! 🐶')});say('Mimo, vem cá! 💗');log('📣','Mimo respondeu ao chamado (botão de teste).');break;
   case 'guard':activity('guard',4.7);audio.play(state.stage>=5?'growl':'bark');say(state.stage>=5?'GRRR... AU AU! Essa casinha é minha! 🛡️':'Au! Au! Vou proteger minha casinha! 🛡️');log('🚪','Mimo ouviu alguém na porta e protegeu seu cantinho.');break;
  }paint();save()}
@@ -62,7 +97,17 @@ function step(dt){const keyX=Number(keys.has('KeyD')||keys.has('ArrowRight'))-Nu
   if(elapsed>complaintTimer&&!state.sleeping){complaintTimer=elapsed+15;if(state.wet>35){activity('whine',2.4);say('Estou molhado... me seca, por favor! 🥺');audio.play('whine');log('💦','Mimo reclamou porque estava molhado.')}else if(state.hunger<35){activity('whine',2.4);say('Minha barriguinha está roncando... 🥺');audio.play('whine');log('🍓','Mimo reclamou porque estava com fome.')}else if(state.energy<20){say('Boceeejo... preciso dormir! 💤');audio.play('whine')}else if(state.happy<24){say('Quero brincar com você... 🥹');audio.play('whine')}}
 }
 function frame(ms){const t=ms/1000;const dt=lastTime?Math.min(.06,t-lastTime):.016;lastTime=t;elapsed+=dt;step(dt);if(scene){try{scene.render({...state,motion},elapsed)}catch(error){console.error('Erro na renderização 3D:',error);$('#sceneError').hidden=false;$('#sceneError').querySelector('p').textContent=String(error)}}if(elapsed-lastUi>.18){paint();lastUi=elapsed}if(bubbleHideAt&&t>bubbleHideAt){bubble.classList.add('hidden');bubbleHideAt=0}saveAccumulator+=dt;if(saveAccumulator>5){saveAccumulator=0;save()}frameCount++;requestAnimationFrame(frame)}
-paintDiary();paint();requestAnimationFrame(frame);
+paintDiary();paint();
+if(!state.petName){nameInput.value='';nameDialog.showModal();setTimeout(()=>nameInput.focus(),40)}
+else {
+  const day=daysSinceBirth();
+  if(day>state.lastVisitDay&&state.lastVisitDay!==0){
+    const gap=day-state.lastVisitDay;
+    setTimeout(()=>{say(gap>1?'Você voltou! Eu estava com saudade de você! 🥹':'Oba, você voltou! Vem brincar comigo! 🐾',5);audio.play('happy')},700);
+  }
+  state.lastVisitDay=day;save();
+}
+requestAnimationFrame(frame);
 if('serviceWorker'in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('./sw.js').catch(error=>console.warn('Offline cache indisponível neste endereço:',error));
 // Diagnóstico explícito para testes automatizados, sem acesso a dados pessoais.
-window.MIMO_BETA_DIAGNOSTICS=()=>({running:!!scene,frames:frameCount,motion,hunger:state.hunger,wet:state.wet,stage:state.stage,position:[state.x,state.z],saved:!!localStorage.getItem(KEY)});
+window.MIMO_BETA_DIAGNOSTICS=()=>({running:!!scene,frames:frameCount,motion,hunger:state.hunger,wet:state.wet,stage:state.stage,name:pet(),bond:state.bond,position:[state.x,state.z],saved:!!localStorage.getItem(KEY)});
