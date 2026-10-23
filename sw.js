@@ -1,5 +1,5 @@
 // Cache offline exclusivo do MIMO. Rede primeiro: atualizações devem aparecer sem limpar os dados.
-const VERSION='mimo-beta-3d-v3';
+const VERSION='mimo-beta-3d-v4';
 const ASSETS=['./','./index.html','./manifest.webmanifest','./src/styles.css','./src/app.js','./src/scene.js','./src/audio.js','./assets/paw.svg','./assets/mimo-referencia-final.jpg','./assets/mimo-referencia-newborn.jpg','./assets/ambiente-referencia.jpg'];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(VERSION).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));
