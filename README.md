@@ -53,3 +53,6 @@ Conecte iPhone e PC ao **mesmo Wi-Fi**. O servidor mostra no terminal o endereç
 Servidor apenas de arquivos estáticos, sem autenticação e sem painel admin; por isso **usar somente em rede local confiável**. Não compartilhe a porta publicamente. O beta não acessa microfone, câmera, arquivos pessoais nem envia dados. Zero telemetria. Os recursos de áudio são sintéticos. As imagens na pasta `assets/` foram fornecidas pelo criador e usadas apenas como referências visuais.
 
 **Compatibilidade:** Chrome e Edge atuais no PC; Safari com WebGL2 no iPhone. Em aparelhos antigos ou com aceleração gráfica desativada, o renderizador pode não abrir.
+
+### Beta 0.2 — correção do início
+O Mimo inicia na fase 1 (**Newborn**) com um corpo visivelmente menor. No primeiro acesso à nova versão, dados antigos que estavam na fase padrão 3 passam para 1 uma única vez, sem apagar fome, energia, higiene, felicidade nem diário. As outras fases continuam preservadas. O novo botão **Voltar ao recém-nascido** retorna à fase 1 sem apagar os cuidados. O cache offline passa a priorizar a versão mais recente quando o servidor estiver online.
