@@ -13,7 +13,7 @@
 <body>
   <div class="app">
     <header class="topbar">
-      <div class="brand"><div class="paw-mark">🐾</div><div><span class="brand-name">mimo<span class="brand-dot">.</span></span><small>your little friend <span class="beta-label">BETA 3D</span></small></div></div>
+      <div class="brand"><div class="paw-mark">🐾</div><div><span class="brand-name">mimo<span class="brand-dot">.</span></span><small>your little friend <span class="beta-label">BETA 0.2</span></small></div></div>
       <div class="top-right"><span class="day-tag"><span class="sun">☀</span> <span id="dayLabel">Dia 1</span></span><button class="icon-button" id="soundButton" title="Ativar ou desativar som" aria-label="Alternar som">🔊</button><button class="icon-button" id="helpButton" title="Como jogar" aria-label="Como jogar">?</button></div>
     </header>
     <main class="layout">
@@ -30,8 +30,9 @@
         <div class="care-tip" id="careTip"><span>💡</span><span>Toque no chão para ele explorar. Ele tem quatro patinhas e adora carinho!</span></div>
         <div class="side-separator"></div>
         <div class="small-heading">FASES DE CRESCIMENTO <span class="prototype-chip">PRÉVIA</span></div>
-        <div class="stage-display"><strong id="stageTitle">Little Puff</strong><span id="stageCount">03 / 10</span></div>
-        <input type="range" id="stageSlider" min="1" max="10" value="3" aria-label="Visualizar fase de crescimento">
+        <div class="stage-display"><strong id="stageTitle">Newborn</strong><span id="stageCount">01 / 10</span></div>
+        <input type="range" id="stageSlider" min="1" max="10" value="1" aria-label="Visualizar fase de crescimento">
+        <button type="button" id="newbornButton" class="newborn-button" title="Voltar à fase 1 sem apagar os cuidados salvos">🐣 Voltar ao recém-nascido</button>
         <p class="muted-tiny">Prévia técnica: tamanho e proporções. O modelo final de cada fase será feito em Blender.</p>
         <div class="side-separator"></div>
         <button class="reference-link" id="referenceButton"><img src="assets/mimo-referencia-final.jpg" alt=""/><span>Ver personagem de referência<small>Foto original enviada por você</small></span><span>↗</span></button>
