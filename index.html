@@ -18,8 +18,9 @@
     </header>
     <main class="layout">
       <aside class="left-panel card">
-        <div class="pet-id"><img src="assets/mimo-referencia-final.jpg" alt="Referência original de MIMO"/><div><div class="eyebrow">SEU PEQUENO AMIGO</div><h1>Mimo <span>♥</span></h1><div id="petMood" class="mood"><span class="mood-dot"></span> Muito feliz!</div></div></div>
-        <p class="panel-caption">Como está o Mimo?</p>
+        <div class="pet-id"><img src="assets/mimo-referencia-final.jpg" alt="Referência original de MIMO"/><div><div class="eyebrow">SEU PEQUENO AMIGO</div><h1><span class="pet-name" data-pet-name>Mimo</span> <span>♥</span></h1><div id="petMood" class="mood"><span class="mood-dot"></span> Muito feliz!</div></div></div>
+        <p class="panel-caption">Como está <span data-pet-name>Mimo</span>? <button id="renameButton" type="button" class="rename-button" title="Alterar nome">✎</button></p>
+        <div class="bond-widget"><div class="bond-header"><span>💗 Nossa amizade</span><strong id="bondValue">0%</strong></div><div class="track"><div class="fill lilac" id="bondBar" style="width:0%"></div></div><small>Cuide, brinque e dê carinho para criar memórias juntos.</small></div>
         <div class="meter-list">
           <div class="meter"><div class="meter-title"><span>🍓 Fome</span><strong id="hungerValue">82%</strong></div><div class="track"><div id="hungerBar" class="fill pink"></div></div></div>
           <div class="meter"><div class="meter-title"><span>💜 Felicidade</span><strong id="happyValue">88%</strong></div><div class="track"><div id="happyBar" class="fill lilac"></div></div></div>
@@ -67,6 +68,7 @@
     </main>
     <footer class="footer"><span>Feito com carinho para o Mimo ♥</span><span>100% gratuito · Sem nuvem · Modo offline</span></footer>
   </div>
+  <dialog id="nameDialog" class="name-dialog"><form id="nameForm" method="dialog"><div class="dialog-icon">🐣</div><h2>Seu filhotinho chegou!</h2><p>Como você quer chamar seu novo melhor amigo? Este será o nome dele na casinha e no diário.</p><label for="petNameInput">Nome do bichinho</label><input id="petNameInput" maxlength="24" autocomplete="off" required placeholder="Ex.: Mimo, Pipoca, Floquinho"><button class="dialog-primary" type="submit">Conhecer meu filhotinho 🐾</button></form></dialog>
   <dialog id="infoDialog"><form method="dialog"><button class="dialog-close" aria-label="Fechar">✕</button><div class="dialog-icon">🐾</div><h2>Bem-vindo à casinha!</h2><p>Este beta já tem um filhotinho 3D animado, necessidades que evoluem ao longo do tempo, sons gerados localmente, salvamento automático e comandos por toque.</p><ul><li><strong>Toque no chão:</strong> Mimo caminha de verdade com quatro patinhas.</li><li><strong>Duplo toque:</strong> ele corre para o ponto marcado.</li><li><strong>Teclas WASD/setas:</strong> controle os movimentos no computador.</li><li><strong>Botões:</strong> alimentar, cuidar, secar, brincar e proteger.</li><li><strong>Controle de fases:</strong> apenas prévia técnica, não são dez modelos finalizados.</li></ul><p>O microfone, a IA Ollama, a rigagem e o pelo definitivo ainda não estão implementados. O botão <b>Chamar</b> simula chamar Mimo, sem acessar o microfone.</p><button class="dialog-primary" value="close">Vamos brincar! ♥</button></form></dialog>
   <dialog id="referenceDialog" class="reference-dialog"><form method="dialog"><button class="dialog-close" aria-label="Fechar">✕</button><div class="eyebrow">ALVO VISUAL · REFERÊNCIA ORIGINAL</div><h2>O Mimo que vamos construir</h2><img src="assets/mimo-referencia-final.jpg" alt="Referência da aparência final do Mimo, pelagem creme e olhos enormes"/><p>O modelo 3D atual é uma <strong>maquete procedural animada</strong>, ainda não uma reprodução fiel desta foto. O personagem definitivo será modelado, peludo e rigado no Blender.</p></form></dialog>
   <script type="module" src="src/app.js"></script>
