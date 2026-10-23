@@ -67,7 +67,7 @@ export class MimoScene {
     // Pequenas plantinhas laterais.
     this.cuboid(I(),[4.8,.25,-2.3],[.4,.24,.4],'frame');for(const [x,z] of [[4.8,-2.3],[4.65,-2.24],[4.95,-2.3]])this.oval(I(),[x,.8,z],[.18,.5,.15],'mint',{rz:(x-4.8)*1.3});
   }
-  dog(state,t){const phase=state.stage||3;const grow=(phase-1)/9;const g=.62+grow*.46;const motion=state.motion||'idle';const move=(motion==='walk'||motion==='run');const run=motion==='run';const seconds=t;const gait=seconds*(run?16:9);const gaitAmount=move?(run?.65:.43):.055;const bounce=move?(.045+Math.abs(Math.sin(gait))* (run?.11:.05)):Math.sin(seconds*2)*.015;
+  dog(state,t){const phase=state.stage||3;const grow=(phase-1)/9;const g=.31+grow*.77;const motion=state.motion||'idle';const move=(motion==='walk'||motion==='run');const run=motion==='run';const seconds=t;const gait=seconds*(run?16:9);const gaitAmount=move?(run?.65:.43):.055;const bounce=move?(.045+Math.abs(Math.sin(gait))* (run?.11:.05)):Math.sin(seconds*2)*.015;
     const sit=motion==='sit'||motion==='feed'||motion==='pet'||motion==='guard'||motion==='sleep';const sleep=motion==='sleep';const guarded=motion==='guard';const shake=motion==='shake';const shakeAngle=shake?Math.sin(seconds*44)*.1:0;const bodyDrop=sit?-.13:0;const root=chain(T(state.x||0,bounce-.06,state.z||0),RY((state.yaw||0)+shakeAngle),S(g,g,g));
     // Sombra alinhada ao corpo.
     this.oval(I(),[state.x||0,.025,state.z||0],[.8*g,.013,1.2*g],'creamDark',{alpha:.18});
