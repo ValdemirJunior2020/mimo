@@ -8,7 +8,13 @@ const KEY='mimo-beta-3d-v1';
 const defaults=()=>({born:now(),last:now(),hunger:82,happy:88,energy:76,clean:93,wet:0,stage:1,x:0,z:.2,yaw:.32,sleeping:false,diary:[{emoji:'🐾',text:'Mimo chegou à sua casinha!',at:now()}]});
 let state;
 try{const loaded=JSON.parse(localStorage.getItem(KEY)||'null');state=loaded&&typeof loaded==='object'?{...defaults(),...loaded,diary:Array.isArray(loaded.diary)?loaded.diary:[]}:defaults();}catch{state=defaults()}
-if(!localStorage.getItem('mimo-growth-birth-v2')){if(state.stage===3)state.stage=1;localStorage.setItem('mimo-growth-birth-v2','1');}
+// A prévia antiga começava na fase 3 e gravava essa escolha no navegador.
+// Migrar uma única vez para recém-nascido; manter necessidades e outras fases escolhidas.
+const newbornMigrationKey='mimo-newborn-start-v3';
+if(!localStorage.getItem(newbornMigrationKey)){
+  if(state.stage===3)state.stage=1;
+  try{localStorage.setItem(newbornMigrationKey,'1')}catch{}
+}
 state.hunger=clamp(state.hunger);state.happy=clamp(state.happy);state.energy=clamp(state.energy);state.clean=clamp(state.clean);state.wet=clamp(state.wet);state.stage=clamp(Math.round(state.stage),1,10);state.x=clamp(state.x,-3.5,3.5);state.z=clamp(state.z,-2.9,2.9);
 // A necessidade aumenta com o tempo real; ninguém morre, ninguém perde o MIMO.
 const hours=clamp((now()-state.last)/3600000,0,48);
@@ -38,6 +44,13 @@ for(const button of document.querySelectorAll('[data-action]'))button.addEventLi
 $('#soundButton').addEventListener('click',()=>{audio.enabled=!audio.enabled;$('#soundButton').textContent=audio.enabled?'🔊':'🔇';$('#soundButton').setAttribute('aria-label',audio.enabled?'Desativar som':'Ativar som');if(audio.enabled)audio.wake();});
 $('#helpButton').addEventListener('click',()=>$('#infoDialog').showModal());
 $('#referenceButton').addEventListener('click',()=>$('#referenceDialog').showModal());
+$('#newbornButton').addEventListener('click',()=>{
+  state.stage=1;state.sleeping=false;target=null;arrive=null;motion='idle';activityUntil=elapsed;
+  audio.wake();audio.play('happy');
+  say('Oinc... sou só uma bolinha de algodão! 🐣',4);
+  log('🐣','Mimo voltou à fase 1 para testar o nascimento.');
+  paint();save();
+});
 $('#stageSlider').addEventListener('input',e=>{const previous=state.stage;state.stage=Number(e.target.value);if(previous!==state.stage){audio.wake();audio.play('magic');say(state.stage===10?'Olha como eu cresci! Ainda sou seu filhotinho! 🥹':'Olha minha fase: '+stages[state.stage-1]+'! 🐾',3.7)}paint();save()});
 const canvas=$('#gameCanvas');try{scene=new MimoScene(canvas);$('#sceneVeil').classList.add('hidden');setTimeout(()=>$('#sceneVeil').remove(),900)}catch(error){console.error('MIMO WebGL:',error);$('#sceneVeil').hidden=true;$('#sceneError').hidden=false;$('#sceneError').querySelector('p').textContent=error.message+' — atualize Chrome ou Edge e habilite aceleração de hardware.'}
 let pointerStart=null;canvas.addEventListener('pointerdown',e=>{pointerStart={x:e.clientX,y:e.clientY,time:performance.now()};audio.wake();});canvas.addEventListener('pointerup',e=>{if(!scene||!pointerStart)return;const p=pointerStart;pointerStart=null;if(Math.hypot(e.clientX-p.x,e.clientY-p.y)>20)return;const point=scene.floorPoint(e.clientX,e.clientY);if(!point)return;const near=Math.hypot(point.x-state.x,point.z-state.z)<.7;if(near){action('pet');return;}const double=(performance.now()-canvas._lastTap)<360;canvas._lastTap=performance.now();goTo(point.x,point.z,double);say(double?'Iiiih! Vou correndo! 💨':'Estou indo explorar! 🐾',2.8)});
